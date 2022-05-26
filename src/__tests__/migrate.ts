@@ -13,8 +13,8 @@ process.on("uncaughtException", function (err) {
   console.log(err)
 })
 
-test.before.cb((t) => {
-  port = startPostgres(CONTAINER_NAME, t)
+test.before(async (t) => {
+  port = await startPostgres(CONTAINER_NAME)
 })
 
 test.after.always(() => {

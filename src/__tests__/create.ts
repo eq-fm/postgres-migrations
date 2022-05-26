@@ -8,8 +8,8 @@ const CONTAINER_NAME = "pg-migrations-test-create"
 
 let port: number
 
-test.before.cb((t) => {
-  port = startPostgres(CONTAINER_NAME, t)
+test.before(async (t) => {
+  port = await startPostgres(CONTAINER_NAME)
 })
 
 test.after.always(() => {

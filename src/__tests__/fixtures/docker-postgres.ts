@@ -1,64 +1,58 @@
 // tslint:disable no-console
 
-import {CbExecutionContext} from "ava"
-import {execSync, spawn} from "child_process"
+import {execSync, spawnSync} from "child_process"
+import {Client} from "pg"
 
 export const PASSWORD = "mysecretpassword"
 
-const HEALTH_CHECK_CMD = `'export PGPASSWORD=${PASSWORD}; HOST=$(hostname --ip-address); echo "SELECT 1" | psql --host=$HOST -U postgres -q -t -A'`
+const DOCKER = spawnSync("which", ["podman"]).status === 0 ? "podman" : "docker"
 
 export const stopPostgres = (containerName: string) => {
   try {
-    execSync(`docker rm -f ${containerName}`)
+    execSync(`${DOCKER} rm -f ${containerName}`)
   } catch (error) {
     console.log("Could not remove the Postgres container")
     throw error
   }
 }
 
-export const startPostgres = (containerName: string, t: CbExecutionContext) => {
+export const startPostgres = async (containerName: string) => {
   try {
     try {
-      execSync(`docker rm -f ${containerName}`, {stdio: "ignore"})
+      execSync(`${DOCKER} rm -f ${containerName}`, {stdio: "ignore"})
     } catch (error) {
       //
     }
 
-    const events = spawn("docker", [
-      "events",
-      "--filter",
-      "type=container",
-      "--filter",
-      `container=${containerName}`,
-      "--filter",
-      "event=health_status",
-    ])
-    events.stdout.on("data", (data) => {
-      const dataString = data.toString()
-
-      if (dataString.includes("health_status: healthy")) {
-        events.kill()
-
-        t.end()
-      }
-    })
-    events.on("error", (err) => {
-      console.error("Error in 'docker events' process:", err)
-      events.kill()
-      t.fail(err.message)
-    })
-
-    execSync(`docker run --detach --publish-all  \
+    execSync(`${DOCKER} run --detach --publish-all  \
       --name ${containerName} \
       --env POSTGRES_PASSWORD=${PASSWORD} \
-      --health-cmd ${HEALTH_CHECK_CMD} \
-      --health-interval=1s \
-      --health-retries=30 \
-      --health-timeout=1s \
-      postgres:9.4`)
+      postgres:14`)
 
-    const portMapping = execSync(`docker port ${containerName} 5432`).toString()
+    const portMapping = execSync(
+      `${DOCKER} port ${containerName} 5432`,
+    ).toString()
     const port = parseInt(portMapping.split(":")[1], 10)
+
+    let connected = false
+
+    while (!connected) {
+      const client = new Client({
+        host: "localhost",
+        user: "postgres",
+        port,
+        password: PASSWORD,
+      })
+
+      try {
+        await client.connect()
+        connected = true
+        await client.end()
+      } catch (e) {
+        await new Promise((r) => setTimeout(r, 100))
+      }
+    }
+
     return port
   } catch (error) {
     console.log("Could not start Postgres", error)
