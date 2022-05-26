@@ -4,6 +4,7 @@ import * as path from "path"
 import * as crypto from "crypto"
 import {loadSqlFromJs} from "./load-sql-from-js"
 import {parseFileName} from "./file-name-parser"
+import {coerceError} from "./util"
 
 const readFile = promisify(fs.readFile)
 
@@ -49,6 +50,8 @@ export const loadMigrationFile = async (filePath: string) => {
       sql,
     }
   } catch (err) {
-    throw new Error(`${err.message} - Offending file: '${fileName}'.`)
+    throw new Error(
+      `${coerceError(err).message} - Offending file: '${fileName}'.`,
+    )
   }
 }

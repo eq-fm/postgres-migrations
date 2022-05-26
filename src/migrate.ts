@@ -11,6 +11,7 @@ import {
   Migration,
   MigrationError,
 } from "./types"
+import {coerceError} from "./util"
 import {validateMigrationHashes} from "./validation"
 import {withConnection} from "./with-connection"
 import {withAdvisoryLock} from "./with-lock"
@@ -145,7 +146,7 @@ function runMigrations(intendedMigrations: Array<Migration>, log: Logger) {
       return completedMigrations
     } catch (e) {
       const error: MigrationError = new Error(
-        `Migration failed. Reason: ${e.message}`,
+        `Migration failed. Reason: ${coerceError(e).message}`,
       )
       error.cause = e
       throw error

@@ -1,5 +1,6 @@
 import * as pg from "pg"
 import {Logger, BasicPgClient} from "./types"
+import {coerceError} from "./util"
 
 export function withConnection<T>(
   log: Logger,
@@ -12,14 +13,14 @@ export function withConnection<T>(
         await client.connect()
         log("... connected to database")
       } catch (e) {
-        log(`Error connecting to database: ${e.message}`)
+        log(`Error connecting to database: ${coerceError(e).message}`)
         throw e
       }
 
       const result = await f(client)
       return result
     } catch (e) {
-      log(`Error using connection: ${e.message}`)
+      log(`Error using connection: ${coerceError(e).message}`)
       throw e
     } finally {
       // always try to close the connection
@@ -28,7 +29,7 @@ export function withConnection<T>(
         await client.end()
         log("... connection closed")
       } catch (e) {
-        log(`Error closing the connection: ${e.message}`)
+        log(`Error closing the connection: ${coerceError(e).message}`)
       }
     }
   }

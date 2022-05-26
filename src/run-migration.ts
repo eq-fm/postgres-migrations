@@ -1,5 +1,6 @@
 import SQL from "sql-template-strings"
 import {Logger, Migration, BasicPgClient} from "./types"
+import {coerceError} from "./util"
 
 const noop = () => {
   //
@@ -52,7 +53,11 @@ export const runMigration =
         //
       }
       throw new Error(
-        `An error occurred running '${migration.name}'. Rolled back this migration. No further migrations were run. Reason: ${err.message}`,
+        `An error occurred running '${
+          migration.name
+        }'. Rolled back this migration. No further migrations were run. Reason: ${
+          coerceError(err).message
+        }`,
       )
     }
   }

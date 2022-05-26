@@ -1,4 +1,5 @@
 import {Logger, BasicPgClient} from "./types"
+import {coerceError} from "./util"
 
 export function withAdvisoryLock<T>(
   log: Logger,
@@ -21,14 +22,14 @@ export function withAdvisoryLock<T>(
         }
         log("... acquired advisory lock")
       } catch (e) {
-        log(`Error acquiring advisory lock: ${e.message}`)
+        log(`Error acquiring advisory lock: ${coerceError(e).message}`)
         throw e
       }
 
       const result = await f(client)
       return result
     } catch (e) {
-      log(`Error while using lock: ${e.message}`)
+      log(`Error while using lock: ${coerceError(e).message}`)
       throw e
     } finally {
       try {
@@ -36,7 +37,7 @@ export function withAdvisoryLock<T>(
         await client.query("SELECT pg_advisory_unlock(-8525285245963000605);")
         log("... released advisory lock")
       } catch (e) {
-        log(`Error releasing advisory lock: ${e.message}`)
+        log(`Error releasing advisory lock: ${coerceError(e).message}`)
       }
     }
   }
