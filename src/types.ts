@@ -6,7 +6,6 @@ export interface Migration {
   readonly contents: string
   readonly fileName: string
   readonly hash: string
-  readonly sql: string
 }
 
 export interface ConnectionParams {
@@ -62,10 +61,8 @@ export interface FullConfig {
 }
 
 export class MigrationError extends Error {
-  public cause?: Error
+  public cause?: unknown
 }
-
-export type FileType = "sql" | "js"
 
 export interface BasicPgClient {
   query(queryTextOrConfig: string | pg.QueryConfig): Promise<pg.QueryResult>

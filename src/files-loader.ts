@@ -7,7 +7,7 @@ import {validateMigrationOrdering} from "./validation"
 
 const readDir = promisify(fs.readdir)
 
-const isValidFile = (fileName: string) => /\.(sql|js)$/gi.test(fileName)
+const isValidFile = (fileName: string) => /\.sql$/gi.test(fileName)
 
 /**
  * Load the migration files and assert they are reasonably valid.

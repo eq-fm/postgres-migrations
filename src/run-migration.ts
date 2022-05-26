@@ -2,9 +2,10 @@ import SQL from "sql-template-strings"
 import {Logger, Migration, BasicPgClient} from "./types"
 import {coerceError} from "./util"
 
-const noop = () => {
+const noop = async () => {
   //
 }
+
 const insertMigration = async (
   migrationTableName: string,
   client: BasicPgClient,
@@ -28,20 +29,23 @@ export const runMigration =
   (migrationTableName: string, client: BasicPgClient, log: Logger = noop) =>
   async (migration: Migration) => {
     const inTransaction =
-      migration.sql.includes("-- postgres-migrations disable-transaction") ===
-      false
+      migration.contents.includes(
+        "-- postgres-migrations disable-transaction",
+      ) === false
 
     log(`Running migration in transaction: ${inTransaction}`)
 
-    const begin = inTransaction ? () => client.query("START TRANSACTION") : noop
+    const begin = inTransaction
+      ? async () => client.query("START TRANSACTION")
+      : noop
 
-    const end = inTransaction ? () => client.query("COMMIT") : noop
+    const end = inTransaction ? async () => client.query("COMMIT") : noop
 
-    const cleanup = inTransaction ? () => client.query("ROLLBACK") : noop
+    const cleanup = inTransaction ? async () => client.query("ROLLBACK") : noop
 
     try {
       await begin()
-      await client.query(migration.sql)
+      await client.query(migration.contents)
       await insertMigration(migrationTableName, client, migration, log)
       await end()
 

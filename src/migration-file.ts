@@ -2,7 +2,6 @@ import {promisify} from "util"
 import * as fs from "fs"
 import * as path from "path"
 import * as crypto from "crypto"
-import {loadSqlFromJs} from "./load-sql-from-js"
 import {parseFileName} from "./file-name-parser"
 import {coerceError} from "./util"
 
@@ -15,31 +14,13 @@ const getFileContents = async (filePath: string) => readFile(filePath, "utf8")
 const hashString = (s: string) =>
   crypto.createHash("sha1").update(s, "utf8").digest("hex")
 
-const getSqlStringLiteral = (
-  filePath: string,
-  contents: string,
-  type: "js" | "sql",
-) => {
-  switch (type) {
-    case "sql":
-      return contents
-    case "js":
-      return loadSqlFromJs(filePath)
-    default: {
-      const exhaustiveCheck: never = type
-      return exhaustiveCheck
-    }
-  }
-}
-
 export const loadMigrationFile = async (filePath: string) => {
   const fileName = getFileName(filePath)
 
   try {
-    const {id, name, type} = parseFileName(fileName)
+    const {id, name} = parseFileName(fileName)
     const contents = await getFileContents(filePath)
-    const sql = getSqlStringLiteral(filePath, contents, type)
-    const hash = hashString(fileName + sql)
+    const hash = hashString(fileName + contents)
 
     return {
       id,
@@ -47,7 +28,6 @@ export const loadMigrationFile = async (filePath: string) => {
       contents,
       fileName,
       hash,
-      sql,
     }
   } catch (err) {
     throw new Error(

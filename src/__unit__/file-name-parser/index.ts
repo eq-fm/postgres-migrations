@@ -9,7 +9,6 @@ test("parse name: 1.sql", (t) => {
     {
       id: 1,
       name: "1.sql",
-      type: "sql",
     },
     "should parse correctly without name, the parsed name must be the fileName",
   )
@@ -22,7 +21,6 @@ test("parse name: 1file.sql", (t) => {
     {
       id: 1,
       name: "file",
-      type: "sql",
     },
     "should parse correctly without separator",
   )
@@ -35,7 +33,6 @@ test("parse name: 1-file.sql", (t) => {
     {
       id: 1,
       name: "file",
-      type: "sql",
     },
     "should parse correctly with dash separator",
   )
@@ -48,7 +45,6 @@ test("parse name: 1_file.sql", (t) => {
     {
       id: 1,
       name: "file",
-      type: "sql",
     },
     "should parse correctly with underscore separator",
   )
@@ -61,7 +57,6 @@ test("parse name: 1-2_file.sql", (t) => {
     {
       id: 1,
       name: "2_file",
-      type: "sql",
     },
     "should parse correctly returning everything after dash separator as name",
   )
@@ -74,7 +69,6 @@ test("parse name: 1_2_file.sql", (t) => {
     {
       id: 1,
       name: "2_file",
-      type: "sql",
     },
     "should parse correctly returning everything after underscore separator as name",
   )
@@ -87,7 +81,6 @@ test("parse name: 1_file.SQL", (t) => {
     {
       id: 1,
       name: "file",
-      type: "sql",
     },
     "should parse correctly with case insensitive",
   )
@@ -100,7 +93,6 @@ test("parse name: 0001_file.sql", (t) => {
     {
       id: 1,
       name: "file",
-      type: "sql",
     },
     "should parse correctly with left zeros",
   )

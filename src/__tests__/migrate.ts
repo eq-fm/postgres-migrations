@@ -227,63 +227,6 @@ test("successful second migration", (t) => {
     })
 })
 
-test("successful first javascript migration", (t) => {
-  const databaseName = "migration-test-success-js-first"
-  const dbConfig = {
-    database: databaseName,
-    user: "postgres",
-    password: PASSWORD,
-    host: "localhost",
-    port,
-  }
-
-  return createDb(databaseName, dbConfig)
-    .then(() => migrate(dbConfig, "src/__tests__/fixtures/success-js-first"))
-    .then(() => doesTableExist(dbConfig, "success"))
-    .then((exists) => {
-      t.truthy(exists)
-    })
-})
-
-test("successful second mixed js and sql migration", (t) => {
-  const databaseName = "migration-test-success-second-mixed-js-sql"
-  const dbConfig = {
-    database: databaseName,
-    user: "postgres",
-    password: PASSWORD,
-    host: "localhost",
-    port,
-  }
-
-  return createDb(databaseName, dbConfig)
-    .then(() => migrate(dbConfig, "src/__tests__/fixtures/success-js-first"))
-    .then(() =>
-      migrate(dbConfig, "src/__tests__/fixtures/success-second-mixed-js-sql"),
-    )
-    .then(() => doesTableExist(dbConfig, "more_success"))
-    .then((exists) => {
-      t.truthy(exists)
-    })
-})
-
-test("successful complex js migration", (t) => {
-  const databaseName = "migration-test-success-complex-js"
-  const dbConfig = {
-    database: databaseName,
-    user: "postgres",
-    password: PASSWORD,
-    host: "localhost",
-    port,
-  }
-
-  return createDb(databaseName, dbConfig)
-    .then(() => migrate(dbConfig, "src/__tests__/fixtures/success-complex-js"))
-    .then(() => doesTableExist(dbConfig, "complex"))
-    .then((exists) => {
-      t.truthy(exists)
-    })
-})
-
 test("bad arguments - no db config", (t) => {
   // tslint:disable-next-line no-any
   return t.throwsAsync((migrate as any)()).then((err) => {
@@ -594,44 +537,6 @@ test("syntax error", (t) => {
 
   return t.throwsAsync(promise).then((err) => {
     t.regex(err.message, /syntax error/)
-  })
-})
-
-test("bad javascript file - no generateSql method exported", (t) => {
-  const databaseName = "migration-test-javascript-file-errors"
-  const dbConfig = {
-    database: databaseName,
-    user: "postgres",
-    password: PASSWORD,
-    host: "localhost",
-    port,
-  }
-
-  const promise = createDb(databaseName, dbConfig).then(() => {
-    return migrate(dbConfig, "src/__tests__/fixtures/js-no-generate-sql")
-  })
-
-  return t.throwsAsync(promise).then((err) => {
-    t.regex(err.message, /export a 'generateSql' function/)
-  })
-})
-
-test("bad javascript file - generateSql not returning string literal", (t) => {
-  const databaseName = "migration-test-javascript-no-literal"
-  const dbConfig = {
-    database: databaseName,
-    user: "postgres",
-    password: PASSWORD,
-    host: "localhost",
-    port,
-  }
-
-  const promise = createDb(databaseName, dbConfig).then(() => {
-    return migrate(dbConfig, "src/__tests__/fixtures/js-no-string-literal")
-  })
-
-  return t.throwsAsync(promise).then((err) => {
-    t.regex(err.message, /string literal/)
   })
 })
 
