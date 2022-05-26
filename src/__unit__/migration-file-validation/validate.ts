@@ -11,5 +11,5 @@ test("two migrations with the same id", async (t) => {
       "src/__unit__/migration-file-validation/fixtures/conflict",
     ),
   )
-  t.regex(error.message, /non-consecutive/)
+  t.regex(error.message, /duplicate migration identifiers/)
 })

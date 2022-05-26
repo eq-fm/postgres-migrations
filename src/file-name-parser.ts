@@ -13,16 +13,16 @@ export interface FileInfo {
 }
 
 export const parseFileName = (fileName: string): FileInfo => {
-  const result = /^(-?\d+)[-_]?(.*)\.sql$/gi.exec(fileName)
+  const result = /^(\d+).*\.sql$/g.exec(fileName)
 
   if (!result) {
     throw new Error(`Invalid file name: '${fileName}'.`)
   }
 
-  const [, id, name] = result
+  const [, id] = result
 
   return {
     id: parseId(id),
-    name: name == null || name === "" ? fileName : name,
+    name: fileName,
   }
 }

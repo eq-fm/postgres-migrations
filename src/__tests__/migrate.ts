@@ -443,64 +443,6 @@ test("empty migrations dir", async (t) => {
   })
 })
 
-test("non-consecutive ordering", (t) => {
-  const databaseName = "migration-test-non-consec"
-  const dbConfig = {
-    database: databaseName,
-    user: "postgres",
-    password: PASSWORD,
-    host: "localhost",
-    port,
-  }
-
-  const promise = createDb(databaseName, dbConfig).then(() => {
-    return migrate(dbConfig, "src/__tests__/fixtures/non-consecutive")
-  })
-
-  return t.throwsAsync(promise).then((err) => {
-    t.regex(err.message, /Found a non-consecutive migration ID/)
-  })
-})
-
-test("not starting from one", (t) => {
-  const databaseName = "migration-test-starting-id"
-  const dbConfig = {
-    database: databaseName,
-    user: "postgres",
-    password: PASSWORD,
-    host: "localhost",
-    port,
-  }
-
-  const promise = createDb(databaseName, dbConfig).then(() => {
-    return migrate(dbConfig, "src/__tests__/fixtures/start-from-2")
-  })
-
-  return t.throwsAsync(promise).then((err) => {
-    t.regex(err.message, /Found a non-consecutive migration ID/)
-  })
-})
-
-test("negative ID", (t) => {
-  const databaseName = "migration-test-negative"
-  const dbConfig = {
-    database: databaseName,
-    user: "postgres",
-    password: PASSWORD,
-    host: "localhost",
-    port,
-  }
-
-  const promise = createDb(databaseName, dbConfig).then(() => {
-    return migrate(dbConfig, "src/__tests__/fixtures/negative")
-  })
-
-  return t.throwsAsync(promise).then((err) => {
-    t.regex(err.message, /Found a non-consecutive migration ID/)
-    t.regex(err.message, /-1_negative/, "Should name the problem file")
-  })
-})
-
 test("invalid file name", (t) => {
   const databaseName = "migration-test-invalid-file-name"
   const dbConfig = {

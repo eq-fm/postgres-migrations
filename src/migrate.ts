@@ -110,15 +110,9 @@ export async function migrate(
 function runMigrations(intendedMigrations: Array<Migration>, log: Logger) {
   return async (client: BasicPgClient) => {
     try {
-      const migrationTableName = "migrations"
-
       log("Starting migrations")
 
-      const appliedMigrations = await fetchAppliedMigrationFromDB(
-        migrationTableName,
-        client,
-        log,
-      )
+      const appliedMigrations = await fetchAppliedMigrationFromDB(client, log)
 
       validateMigrationHashes(intendedMigrations, appliedMigrations)
 
@@ -130,11 +124,7 @@ function runMigrations(intendedMigrations: Array<Migration>, log: Logger) {
 
       for (const migration of migrationsToRun) {
         log(`Starting migration: ${migration.id} ${migration.name}`)
-        const result = await runMigration(
-          migrationTableName,
-          client,
-          log,
-        )(migration)
+        const result = await runMigration(client, log)(migration)
         log(`Finished migration: ${migration.id} ${migration.name}`)
         completedMigrations.push(result)
       }
@@ -155,24 +145,19 @@ function runMigrations(intendedMigrations: Array<Migration>, log: Logger) {
 }
 
 /** Queries the database for migrations table and retrieve it rows if exists */
-async function fetchAppliedMigrationFromDB(
-  migrationTableName: string,
-  client: BasicPgClient,
-  log: Logger,
-) {
+async function fetchAppliedMigrationFromDB(client: BasicPgClient, log: Logger) {
   let appliedMigrations = []
-  if (await doesTableExist(client, migrationTableName)) {
-    log(
-      `Migrations table with name '${migrationTableName}' exists, filtering not applied migrations.`,
-    )
+  if (await doesMigrationTableExist(client)) {
+    log(`Migrations table exists, filtering not applied migrations.`)
 
     const {rows} = await client.query(
-      `SELECT * FROM ${migrationTableName} ORDER BY id`,
+      "select * from public.migration order by id",
     )
     appliedMigrations = rows
   } else {
-    log(`Migrations table with name '${migrationTableName}' hasn't been created,
-so the database is new and we need to run all migrations.`)
+    log(
+      `Migrations table hasn't been created, so the database is new and we need to run all migrations.`,
+    )
   }
   return appliedMigrations
 }
@@ -202,12 +187,16 @@ function logResult(completedMigrations: Array<Migration>, log: Logger) {
 }
 
 /** Check whether table exists in postgres - http://stackoverflow.com/a/24089729 */
-async function doesTableExist(client: BasicPgClient, tableName: string) {
-  const result = await client.query(SQL`SELECT EXISTS (
-  SELECT 1
-  FROM   pg_catalog.pg_class c
-  WHERE  c.relname = ${tableName}
-  AND    c.relkind = 'r'
+async function doesMigrationTableExist(client: BasicPgClient) {
+  const result = await client.query(SQL`select exists (
+select
+  1
+from
+  pg_catalog.pg_class as c join pg_catalog.pg_namespace as ns on c.relnamespace = ns.oid
+where
+  ns.nspname = 'public' and
+  c.relname = 'migration' and
+  c.relkind = 'r'
 );`)
 
   return result.rows.length > 0 && result.rows[0].exists

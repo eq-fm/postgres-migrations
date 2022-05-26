@@ -4,7 +4,6 @@ export interface Migration {
   readonly id: number
   readonly name: string
   readonly contents: string
-  readonly fileName: string
   readonly hash: string
 }
 
