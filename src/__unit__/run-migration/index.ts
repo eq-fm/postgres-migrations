@@ -27,7 +27,7 @@ test.before(async () => {
 
 function buildMigration(sql: string): Migration {
   return {
-    id: 1,
+    id: 1n,
     name: "name",
     contents: sql,
     hash: "hash",

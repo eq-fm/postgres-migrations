@@ -1,14 +1,13 @@
 const parseId = (id: string) => {
-  const parsed = parseInt(id, 10)
-  if (isNaN(parsed)) {
+  try {
+    return BigInt(id)
+  } catch (e) {
     throw new Error(`Migration file name should begin with an integer ID.'`)
   }
-
-  return parsed
 }
 
 export interface FileInfo {
-  id: number
+  id: bigint
   name: string
 }
 

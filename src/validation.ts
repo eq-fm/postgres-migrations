@@ -12,10 +12,12 @@ export function validateMigrationNoDuplicates(migrations: Array<Migration>) {
 /** Assert hashes match */
 export function validateMigrationHashes(
   migrations: Array<Migration>,
-  appliedMigrations: Record<number, Migration | undefined>,
+  appliedMigrations: Array<Migration>,
 ) {
   const invalidHash = (migration: Migration) => {
-    const appliedMigration = appliedMigrations[migration.id]
+    const appliedMigration = appliedMigrations.filter(
+      (item) => item.id === migration.id,
+    )[0]
     return appliedMigration != null && appliedMigration.hash !== migration.hash
   }
 

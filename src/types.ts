@@ -1,7 +1,7 @@
 import * as pg from "pg"
 
 export interface Migration {
-  readonly id: number
+  readonly id: bigint
   readonly name: string
   readonly contents: string
   readonly hash: string

@@ -153,7 +153,8 @@ async function fetchAppliedMigrationFromDB(client: BasicPgClient, log: Logger) {
     const {rows} = await client.query(
       "select * from public.migration order by id",
     )
-    appliedMigrations = rows
+
+    appliedMigrations = rows.map((row) => ({...row, id: BigInt(row.id)}))
   } else {
     log(
       `Migrations table hasn't been created, so the database is new and we need to run all migrations.`,
@@ -165,10 +166,10 @@ async function fetchAppliedMigrationFromDB(client: BasicPgClient, log: Logger) {
 /** Work out which migrations to apply */
 function filterMigrations(
   migrations: Array<Migration>,
-  appliedMigrations: Record<number, Migration | undefined>,
+  appliedMigrations: Array<Migration>,
 ) {
   const notAppliedMigration = (migration: Migration) =>
-    !appliedMigrations[migration.id]
+    appliedMigrations.filter((item) => item.id === migration.id).length === 0
 
   return migrations.filter(notAppliedMigration)
 }

@@ -21,7 +21,7 @@ create table public.migration (
 `
 
 const INITIAL_MIGRATION = {
-  id: 0,
+  id: 0n,
   name: INITIAL_MIGRATION_NAME,
   contents: INITIAL_MIGRATION_CONTENT,
   hash: hashString(INITIAL_MIGRATION_NAME + INITIAL_MIGRATION_CONTENT),
@@ -60,7 +60,15 @@ export const loadMigrationFiles = async (
   // Arrange in ID order
   const orderedMigrations = [
     INITIAL_MIGRATION,
-    ...unorderedMigrations.sort((a, b) => a.id - b.id),
+    ...unorderedMigrations.sort((a, b) => {
+      if (a > b) {
+        return 1
+      } else if (a < b) {
+        return -1
+      } else {
+        return 0
+      }
+    }),
   ]
 
   validateMigrationNoDuplicates(orderedMigrations)

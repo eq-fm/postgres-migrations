@@ -7,7 +7,7 @@ test("parse name: 1.sql", (t) => {
   t.deepEqual(
     parsed,
     {
-      id: 1,
+      id: 1n,
       name: "1.sql",
     },
     "should parse correctly without name, the parsed name must be the fileName",
@@ -19,7 +19,7 @@ test("parse name: 0001.sql", (t) => {
   t.deepEqual(
     parsed,
     {
-      id: 1,
+      id: 1n,
       name: "0001.sql",
     },
     "should parse correctly with leading zeros",
@@ -31,8 +31,20 @@ test("parse name: 1file.sql", (t) => {
   t.deepEqual(
     parsed,
     {
-      id: 1,
+      id: 1n,
       name: "1file.sql",
+    },
+    "should parse correctly with postfix",
+  )
+})
+
+test("parse name: 9007199254740992file.sql", (t) => {
+  const parsed = parseFileName("9007199254740992file.sql")
+  t.deepEqual(
+    parsed,
+    {
+      id: 9007199254740992n,
+      name: "9007199254740992file.sql",
     },
     "should parse correctly with postfix",
   )
